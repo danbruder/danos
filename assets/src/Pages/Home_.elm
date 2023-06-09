@@ -17,21 +17,18 @@ page =
             { sidebar =
                 [ div
                     [ css
-                        [ Tw.bg_color Tw.gray_50
-                        , Tw.p_2
-                        ]
+                        []
                     ]
-                    [ text "Hello, DanOs"
+                    [ text "sidebar"
                     ]
                 ]
             , content =
                 [ div
                     [ css
                         [ Tw.w_full
-                        , Tw.p_2
                         ]
                     ]
-                    [ text "Hello, DanOs"
+                    [ text "main "
                     ]
                 ]
             }
