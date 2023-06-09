@@ -28,16 +28,14 @@ layout { sidebar, content } =
                         [ h_screen
                         , min_h_screen
                         , bg_color Tw.gray_50
-                        , p_2
-                        , max_w_lg
+                        , w_80
                         ]
                     ]
                     sidebar
                 , Html.div
                     [ css
-                        [ Tw.h_screen
-                        , Tw.min_h_screen
-                        , Tw.p_2
+                        [ h_screen
+                        , min_h_screen
                         , overflow_y_scroll
                         , w_full
                         ]
