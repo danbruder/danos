@@ -1,9 +1,11 @@
 module Pages.SignIn exposing (Model, Msg, page)
 
+import Api.SignIn
 import Effect exposing (Effect)
 import Html.Styled as Html exposing (..)
 import Html.Styled.Attributes as Attr exposing (css, href)
 import Html.Styled.Events as Events
+import Http
 import Page exposing (Page)
 import Route exposing (Route)
 import Shared
@@ -51,6 +53,7 @@ init () =
 type Msg
     = UserUpdatedInput Field String
     | UserSubmittedForm
+    | SignInApiResponded (Result Http.Error Api.SignIn.Data)
 
 
 type Field
@@ -73,6 +76,20 @@ update msg model =
 
         UserSubmittedForm ->
             ( { model | isSubmittingForm = True }
+            , Api.SignIn.post
+                { onResponse = SignInApiResponded
+                , email = model.email
+                , password = model.password
+                }
+            )
+
+        SignInApiResponded (Ok { token }) ->
+            ( { model | isSubmittingForm = False }
+            , Effect.none
+            )
+
+        SignInApiResponded (Err httpError) ->
+            ( { model | isSubmittingForm = False }
             , Effect.none
             )
 
