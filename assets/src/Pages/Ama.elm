@@ -1,4 +1,4 @@
-module Pages.Profile.Me exposing (Model, Msg, page)
+module Pages.Ama exposing (Model, Msg, page)
 
 import Auth
 import Effect exposing (Effect)
@@ -25,7 +25,7 @@ layout : Auth.User -> Model -> Layouts.Layout
 layout user model =
     Layouts.Sidebar
         { sidebar =
-            { title = "Profile"
+            { title = "AMA"
             , user = user
             }
         }
@@ -78,6 +78,6 @@ subscriptions model =
 
 view : Model -> View Msg
 view model =
-    { title = "Pages.Profile.Me"
-    , body = [ Html.text "/profile/me" ]
+    { title = "Pages.Ama"
+    , body = [ Html.text "/ama" ]
     }

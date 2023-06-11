@@ -1,27 +1,33 @@
 module Pages.Bookmarks exposing (Model, Msg, page)
 
-import Css
+import Auth
 import Effect exposing (Effect)
 import Html
-import Html.Styled exposing (..)
-import Html.Styled.Attributes as Attr exposing (css, href)
+import Layouts
 import Page exposing (Page)
 import Route exposing (Route)
 import Shared
-import Tailwind.Breakpoints as Breakpoints
-import Tailwind.Theme as Tw
-import Tailwind.Utilities as Tw
-import Ui
 import View exposing (View)
 
 
-page : Shared.Model -> Route () -> Page Model Msg
-page shared route =
+page : Auth.User -> Shared.Model -> Route () -> Page Model Msg
+page user shared route =
     Page.new
         { init = init
         , update = update
         , subscriptions = subscriptions
         , view = view
+        }
+        |> Page.withLayout (layout user)
+
+
+layout : Auth.User -> Model -> Layouts.Layout
+layout user model =
+    Layouts.Sidebar
+        { sidebar =
+            { title = "Bookmarks"
+            , user = user
+            }
         }
 
 
@@ -73,16 +79,5 @@ subscriptions model =
 view : Model -> View Msg
 view model =
     { title = "Pages.Bookmarks"
-    , body =
-        [ Ui.layout
-            { sidebar =
-                [ Ui.sidebar
-                ]
-            , body =
-                [ div [ css [ Tw.w_full, Tw.px_3, Tw.py_2 ] ]
-                    [ text "Bookmarks"
-                    ]
-                ]
-            }
-        ]
+    , body = [ Html.text "/bookmarks" ]
     }

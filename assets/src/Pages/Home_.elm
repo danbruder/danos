@@ -3,6 +3,7 @@ module Pages.Home_ exposing (Model, Msg, page)
 import Auth
 import Effect exposing (Effect)
 import Html
+import Layouts
 import Page exposing (Page)
 import Route exposing (Route)
 import Shared
@@ -16,6 +17,17 @@ page user shared route =
         , update = update
         , subscriptions = subscriptions
         , view = view
+        }
+        |> Page.withLayout (layout user)
+
+
+layout : Auth.User -> Model -> Layouts.Layout
+layout user model =
+    Layouts.Sidebar
+        { sidebar =
+            { title = "Dashboard"
+            , user = user
+            }
         }
 
 
