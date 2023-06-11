@@ -33,6 +33,7 @@ type alias Model =
     { email : String
     , password : String
     , isSubmittingForm : Bool
+    , errors : List Api.SignIn.Error
     }
 
 
@@ -41,6 +42,7 @@ init () =
     ( { email = ""
       , password = ""
       , isSubmittingForm = False
+      , errors = []
       }
     , Effect.none
     )
@@ -53,7 +55,7 @@ init () =
 type Msg
     = UserUpdatedInput Field String
     | UserSubmittedForm
-    | SignInApiResponded (Result Http.Error Api.SignIn.Data)
+    | SignInApiResponded (Result (List Api.SignIn.Error) Api.SignIn.Data)
 
 
 type Field
@@ -75,7 +77,7 @@ update msg model =
             )
 
         UserSubmittedForm ->
-            ( { model | isSubmittingForm = True }
+            ( { model | isSubmittingForm = True, errors = [] }
             , Api.SignIn.post
                 { onResponse = SignInApiResponded
                 , email = model.email
@@ -85,11 +87,11 @@ update msg model =
 
         SignInApiResponded (Ok { token }) ->
             ( { model | isSubmittingForm = False }
-            , Effect.none
+            , Effect.signIn { token = token }
             )
 
-        SignInApiResponded (Err httpError) ->
-            ( { model | isSubmittingForm = False }
+        SignInApiResponded (Err errors) ->
+            ( { model | isSubmittingForm = False, errors = errors }
             , Effect.none
             )
 
@@ -134,10 +136,12 @@ viewForm model =
         [ viewFormInput
             { field = Email
             , value = model.email
+            , error = findFieldError "email" model
             }
         , viewFormInput
             { field = Password
             , value = model.password
+            , error = findFieldError "password" model
             }
         , viewFormControls model
         ]
@@ -146,6 +150,7 @@ viewForm model =
 viewFormInput :
     { field : Field
     , value : String
+    , error : Maybe Api.SignIn.Error
     }
     -> Html Msg
 viewFormInput options =
@@ -154,12 +159,23 @@ viewFormInput options =
         , Html.div [ Attr.class "control" ]
             [ Html.input
                 [ Attr.class "input"
+                , Attr.classList
+                    [ ( "is-danger", options.error /= Nothing )
+                    ]
                 , Attr.type_ (fromFieldToInputType options.field)
                 , Attr.value options.value
                 , Events.onInput (UserUpdatedInput options.field)
                 ]
                 []
             ]
+        , case options.error of
+            Just error ->
+                Html.p
+                    [ Attr.class "help is-danger" ]
+                    [ Html.text error.message ]
+
+            Nothing ->
+                Html.text ""
         ]
 
 
@@ -185,14 +201,48 @@ fromFieldToInputType field =
 
 viewFormControls : Model -> Html Msg
 viewFormControls model =
-    Html.div [ Attr.class "field is-grouped is-grouped-right" ]
-        [ Html.div
-            [ Attr.class "control" ]
-            [ Html.button
-                [ Attr.class "button is-link"
-                , Attr.disabled model.isSubmittingForm
-                , Attr.classList [ ( "is-loading", model.isSubmittingForm ) ]
+    Html.div []
+        [ Html.div [ Attr.class "field is-grouped is-grouped-right" ]
+            [ Html.div
+                [ Attr.class "control" ]
+                [ Html.button
+                    [ Attr.class "button is-link"
+                    , Attr.disabled model.isSubmittingForm
+                    , Attr.classList [ ( "is-loading", model.isSubmittingForm ) ]
+                    ]
+                    [ Html.text "Sign in" ]
                 ]
-                [ Html.text "Sign in" ]
             ]
+        , case findFormError model of
+            Just error ->
+                Html.p
+                    [ Attr.class "help content is-danger" ]
+                    [ Html.text error.message ]
+
+            Nothing ->
+                Html.text ""
         ]
+
+
+findFieldError : String -> Model -> Maybe Api.SignIn.Error
+findFieldError field model =
+    let
+        hasMatchingField : Api.SignIn.Error -> Bool
+        hasMatchingField error =
+            error.field == Just field
+    in
+    model.errors
+        |> List.filter hasMatchingField
+        |> List.head
+
+
+findFormError : Model -> Maybe Api.SignIn.Error
+findFormError model =
+    let
+        doesntHaveField : Api.SignIn.Error -> Bool
+        doesntHaveField error =
+            error.field == Nothing
+    in
+    model.errors
+        |> List.filter doesntHaveField
+        |> List.head

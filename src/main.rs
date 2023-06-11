@@ -28,15 +28,38 @@ async fn main() {
         .unwrap();
 }
 
-async fn sign_in(Json(payload): Json<SignIn>) -> Result<Json<SignInResponse>, StatusCode> {
+async fn sign_in(
+    Json(payload): Json<SignIn>,
+) -> Result<Json<SignInResponse>, (StatusCode, Json<SignInErrors>)> {
     time::sleep(Duration::from_millis(500)).await;
+
+    let mut errors = vec![];
+
+    if payload.email.is_empty() {
+        errors.push(SignInError {
+            field: "email".into(),
+            message: "Email cannot be empty".into(),
+        });
+    }
+
+    if payload.password.is_empty() {
+        errors.push(SignInError {
+            field: "password".into(),
+            message: "Password cannot be empty".into(),
+        });
+    }
 
     if &payload.email == "dan@dan.com" && &payload.password == "yeet" {
         Ok(Json(SignInResponse {
             token: SECRET_TOKEN_EXAMPLE.into(),
         }))
     } else {
-        Err(StatusCode::UNAUTHORIZED)
+        errors.push(SignInError {
+            message: "Invalid email or password".into(),
+            field: "password".into(),
+        });
+
+        Err((StatusCode::UNAUTHORIZED, Json(SignInErrors { errors })))
     }
 }
 
@@ -63,6 +86,17 @@ struct SignIn {
 #[derive(Serialize)]
 struct SignInResponse {
     token: String,
+}
+
+#[derive(Serialize)]
+struct SignInErrors {
+    errors: Vec<SignInError>,
+}
+
+#[derive(Serialize)]
+struct SignInError {
+    message: String,
+    field: String,
 }
 
 #[derive(Serialize)]
