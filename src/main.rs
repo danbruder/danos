@@ -1,4 +1,5 @@
 use axum::{
+    extract::Query,
     http,
     http::{HeaderValue, Method, StatusCode},
     routing::{get, post},
@@ -8,7 +9,7 @@ use serde::{Deserialize, Serialize};
 use tokio::{time, time::Duration};
 use tower_http::cors::CorsLayer;
 
-const SECRET_TOKEN_EXAMPLE: &'static str = "dan's secret token of doom";
+const SECRET_TOKEN_EXAMPLE: &'static str = "123";
 
 #[tokio::main]
 async fn main() {
@@ -63,7 +64,7 @@ async fn sign_in(
     }
 }
 
-async fn me(token: String) -> Result<Json<User>, StatusCode> {
+async fn me(Query(MeQuery { token }): Query<MeQuery>) -> Result<Json<User>, StatusCode> {
     if &token == SECRET_TOKEN_EXAMPLE {
         time::sleep(Duration::from_secs(1)).await;
         Ok(Json(User {
@@ -75,6 +76,11 @@ async fn me(token: String) -> Result<Json<User>, StatusCode> {
     } else {
         Err(StatusCode::UNAUTHORIZED)
     }
+}
+
+#[derive(Deserialize)]
+struct MeQuery {
+    token: String,
 }
 
 #[derive(Deserialize)]

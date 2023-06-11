@@ -1,4 +1,4 @@
-module Pages.Home_ exposing (Model, Msg, page)
+module Pages.Settings exposing (Model, Msg, page)
 
 import Auth
 import Effect exposing (Effect)
@@ -66,6 +66,6 @@ subscriptions model =
 
 view : Model -> View Msg
 view model =
-    { title = "Pages.Home_"
-    , body = [ Html.text "/" ]
+    { title = "Pages.Settings"
+    , body = [ Html.text "/settings" ]
     }

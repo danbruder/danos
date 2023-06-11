@@ -11,5 +11,11 @@ own file, so they can be imported by `Effect.elm`
 
 -}
 type Msg
-    = SignIn { token : String }
+    = SignIn
+        { token : String
+        , id : String
+        , name : String
+        , profileImageUrl : String
+        , email : String
+        }
     | SignOut

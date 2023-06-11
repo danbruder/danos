@@ -26,13 +26,23 @@ import Shared.Msg
 
 
 type alias Flags =
-    { token : Maybe String }
+    { user : Maybe Shared.Model.User }
 
 
 decoder : Json.Decode.Decoder Flags
 decoder =
     Json.Decode.map Flags
-        (Json.Decode.field "token" (Json.Decode.maybe Json.Decode.string))
+        (Json.Decode.field "user" (Json.Decode.maybe userDecoder))
+
+
+userDecoder : Json.Decode.Decoder Shared.Model.User
+userDecoder =
+    Json.Decode.map5 Shared.Model.User
+        (Json.Decode.field "token" Json.Decode.string)
+        (Json.Decode.field "id" Json.Decode.string)
+        (Json.Decode.field "name" Json.Decode.string)
+        (Json.Decode.field "profileImageUrl" Json.Decode.string)
+        (Json.Decode.field "email" Json.Decode.string)
 
 
 
@@ -49,9 +59,9 @@ init flagsResult route =
         flags : Flags
         flags =
             flagsResult
-                |> Result.withDefault { token = Nothing }
+                |> Result.withDefault { user = Nothing }
     in
-    ( { token = flags.token }
+    ( { user = flags.user }
     , Effect.none
     )
 
@@ -67,20 +77,20 @@ type alias Msg =
 update : Route () -> Msg -> Model -> ( Model, Effect Msg )
 update route msg model =
     case msg of
-        Shared.Msg.SignIn { token } ->
-            ( { model | token = Just token }
+        Shared.Msg.SignIn user ->
+            ( { model | user = Just user }
             , Effect.batch
                 [ Effect.pushRoute
                     { path = Route.Path.Home_
                     , query = Dict.empty
                     , hash = Nothing
                     }
-                , Effect.saveUser token
+                , Effect.saveUser user
                 ]
             )
 
         Shared.Msg.SignOut ->
-            ( { model | token = Nothing }
+            ( { model | user = Nothing }
             , Effect.clearUser
             )
 

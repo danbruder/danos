@@ -1,4 +1,4 @@
-module Shared.Model exposing (Model)
+module Shared.Model exposing (Model, User)
 
 {-| -}
 
@@ -11,4 +11,14 @@ own file, so they can be imported by `Effect.elm`
 
 -}
 type alias Model =
-    { token : Maybe String }
+    { user : Maybe User
+    }
+
+
+type alias User =
+    { token : String
+    , id : String
+    , name : String
+    , profileImageUrl : String
+    , email : String
+    }

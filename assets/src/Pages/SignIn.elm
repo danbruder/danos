@@ -1,5 +1,6 @@
 module Pages.SignIn exposing (Model, Msg, page)
 
+import Api.Me
 import Api.SignIn
 import Effect exposing (Effect)
 import Html.Styled as Html exposing (..)
@@ -56,6 +57,7 @@ type Msg
     = UserUpdatedInput Field String
     | UserSubmittedForm
     | SignInApiResponded (Result (List Api.SignIn.Error) Api.SignIn.Data)
+    | MeApiResponded String (Result Http.Error Api.Me.User)
 
 
 type Field
@@ -87,12 +89,41 @@ update msg model =
 
         SignInApiResponded (Ok { token }) ->
             ( { model | isSubmittingForm = False }
-            , Effect.signIn { token = token }
+            , Api.Me.get
+                { token = token
+                , onResponse = MeApiResponded token
+                }
             )
 
         SignInApiResponded (Err errors) ->
             ( { model | isSubmittingForm = False, errors = errors }
             , Effect.none
+            )
+
+        MeApiResponded token (Ok user) ->
+            ( { model | isSubmittingForm = False }
+            , Effect.signIn
+                { id = user.id
+                , name = user.name
+                , profileImageUrl = user.profileImageUrl
+                , email = user.email
+                , token = token
+                }
+            )
+
+        MeApiResponded _ (Err httpError) ->
+            let
+                error : Api.SignIn.Error
+                error =
+                    { field = Nothing
+                    , message = "User couldn't be found"
+                    }
+            in
+            ( { model
+                | isSubmittingForm = False
+                , errors = [ error ]
+              }
+            , Effect.signOut
             )
 
 
