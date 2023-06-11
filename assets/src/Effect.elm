@@ -1,25 +1,23 @@
-module Effect exposing
+port module Effect exposing
     ( Effect
-    , none, batch
-    , sendCmd, sendMsg
-    , pushRoute, replaceRoute, loadExternalUrl
-    , map, toCmd
-    , signIn, signOut
+    , batch
+    , clearUser
+    , loadExternalUrl
+    , map
+    , none
+    , pushRoute
+    , replaceRoute
+    , saveUser
+    , sendCmd
+    , sendMsg
+    , signIn
+    , signOut
+    , toCmd
     )
-
-{-|
-
-@docs Effect
-@docs none, batch
-@docs sendCmd, sendMsg
-@docs pushRoute, replaceRoute, loadExternalUrl
-
-@docs map, toCmd
-
--}
 
 import Browser.Navigation
 import Dict exposing (Dict)
+import Json.Encode
 import Route exposing (Route)
 import Route.Path
 import Route.Query
@@ -40,6 +38,30 @@ type Effect msg
     | LoadExternalUrl String
       -- SHARED
     | SendSharedMsg Shared.Msg.Msg
+    | SendToLocalStorage { key : String, value : Json.Encode.Value }
+
+
+port sendToLocalStorage :
+    { key : String
+    , value : Json.Encode.Value
+    }
+    -> Cmd msg
+
+
+saveUser : String -> Effect msg
+saveUser token =
+    SendToLocalStorage
+        { key = "token"
+        , value = Json.Encode.string token
+        }
+
+
+clearUser : Effect msg
+clearUser =
+    SendToLocalStorage
+        { key = "token"
+        , value = Json.Encode.null
+        }
 
 
 
@@ -153,6 +175,9 @@ map fn effect =
         SendSharedMsg sharedMsg ->
             SendSharedMsg sharedMsg
 
+        SendToLocalStorage value ->
+            SendToLocalStorage value
+
 
 {-| Elm Land depends on this function to perform your effects.
 -}
@@ -189,3 +214,6 @@ toCmd options effect =
         SendSharedMsg sharedMsg ->
             Task.succeed sharedMsg
                 |> Task.perform options.fromSharedMsg
+
+        SendToLocalStorage value ->
+            sendToLocalStorage value
