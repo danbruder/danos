@@ -1,18 +1,14 @@
 module Shared exposing
-    ( Flags, decoder
-    , Model, Msg
-    , init, update, subscriptions
+    ( Flags
+    , Model
+    , Msg
+    , decoder
+    , init
+    , subscriptions
+    , update
     )
 
-{-|
-
-@docs Flags, decoder
-@docs Model, Msg
-@docs init, update, subscriptions
-
--}
-
-import Dict
+import Dict exposing (Dict)
 import Effect exposing (Effect)
 import Json.Decode
 import Route exposing (Route)
@@ -26,7 +22,8 @@ import Shared.Msg
 
 
 type alias Flags =
-    { user : Maybe Shared.Model.User }
+    { user : Maybe Shared.Model.User
+    }
 
 
 decoder : Json.Decode.Decoder Flags

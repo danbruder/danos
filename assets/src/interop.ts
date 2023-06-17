@@ -1,7 +1,7 @@
 export const flags = ({ env }) => {
   // Called before our Elm application starts
   return {
-      user: JSON.parse(window.localStorage.user || null)
+      user: JSON.parse(window.localStorage.user || null),
   }
 }
 

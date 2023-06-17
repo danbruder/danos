@@ -88,7 +88,7 @@ view settings route { fromMsg, model, content } =
                             [ h_screen
                             , min_h_screen
                             , bg_color Tw.gray_50
-                            , w_80
+                            , w_64
                             ]
                         ]
                         [ viewSidebar
@@ -119,9 +119,12 @@ view settings route { fromMsg, model, content } =
 viewSidebar : { user : Auth.User, route : Route () } -> Html Msg
 viewSidebar { user, route } =
     Html.aside
-        [ class "is-flex is-flex-direction-column p-2"
-        , style "min-width" "200px"
-        , style "border-right" "solid 1px #eee"
+        [ css
+            [ Tw.overflow_y_scroll
+            , Tw.h_screen
+            , Tw.border_r
+            , Tw.border_color Tw.gray_200
+            ]
         ]
         [ viewSidebarLinks route
         , viewSignOutButton user
@@ -131,19 +134,18 @@ viewSidebar { user, route } =
 viewSignOutButton : Auth.User -> Html Msg
 viewSignOutButton user =
     Html.button
-        [ class "button is-text is-fullwidth"
-        , Events.onClick UserClickedSignOut
+        [ Events.onClick UserClickedSignOut
         ]
-        [ Html.div [ class "is-flex is-align-items-center" ]
-            [ Html.figure [ class "image is-24x24" ]
+        [ Html.div [ class "" ]
+            [ Html.figure [ class "" ]
                 [ Html.img
-                    [ class "is-rounded"
+                    [ class ""
                     , src ""
                     , alt user.name
                     ]
                     []
                 ]
-            , Html.span [ class "pl-2" ] [ Html.text "Sign out" ]
+            , Html.span [ class "" ] [ Html.text "Sign out" ]
             ]
         ]
 
@@ -156,6 +158,7 @@ viewMainContent { title, content } =
         )
 
 
+viewSidebarLinks : Route () -> Html msg
 viewSidebarLinks route =
     div [ css [ Tw.flex_1, Tw.p_3, Tw.space_y_1 ] ]
         [ h1 [ css [ Tw.font_bold, Tw.text_sm, Tw.px_2 ] ]
@@ -163,7 +166,7 @@ viewSidebarLinks route =
             ]
         , viewLinkGroup ""
             [ Link "Home" "/" ""
-            , Link "Writing" "/writing" ""
+            , Link "Writing" "/blog" ""
             ]
         , viewLinkGroup "Me"
             [ Link "Bookmarks" "/bookmarks" ""

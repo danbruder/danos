@@ -7,6 +7,7 @@ port module Effect exposing
     , none
     , pushRoute
     , replaceRoute
+    , saveToLocalStorage
     , saveUser
     , sendCmd
     , sendMsg
@@ -67,6 +68,14 @@ saveUser user =
                 , ( "profileImageUrl", Json.Encode.string user.profileImageUrl )
                 , ( "email", Json.Encode.string user.email )
                 ]
+        }
+
+
+saveToLocalStorage : String -> Json.Encode.Value -> Effect msg
+saveToLocalStorage key value =
+    SendToLocalStorage
+        { key = key
+        , value = value
         }
 
 
