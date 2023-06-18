@@ -16,6 +16,7 @@ async fn main() {
     let app = Router::new()
         .route("/api/sign-in", post(sign_in))
         .route("/api/me", get(me))
+        .route("/api/blog", get(blog_index))
         .layer(
             CorsLayer::new()
                 .allow_origin("http://localhost:1234".parse::<HeaderValue>().unwrap())
@@ -111,4 +112,37 @@ struct User {
     name: String,
     profile_image_url: String,
     email: String,
+}
+
+// Blog stuff
+
+async fn blog_index() -> Json<BlogEntries> {
+    let entries = vec![
+        BlogEntry {
+            slug: "yeet".into(),
+            title: "yeet".into(),
+            date: "2023-01-1".into(),
+            category: "yeets".into(),
+        },
+        BlogEntry {
+            slug: "yeet2".into(),
+            title: "yeet 2".into(),
+            date: "2023-02-1".into(),
+            category: "yeets".into(),
+        },
+    ];
+    Json(BlogEntries { entries })
+}
+
+#[derive(Serialize)]
+struct BlogEntries {
+    entries: Vec<BlogEntry>,
+}
+
+#[derive(Serialize)]
+struct BlogEntry {
+    slug: String,
+    date: String,
+    title: String,
+    category: String,
 }
