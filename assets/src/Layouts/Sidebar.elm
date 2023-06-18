@@ -116,21 +116,6 @@ view settings route { fromMsg, model, content } =
     }
 
 
-viewSidebar : { user : Auth.User, route : Route () } -> Html Msg
-viewSidebar { user, route } =
-    Html.aside
-        [ css
-            [ Tw.overflow_y_scroll
-            , Tw.h_screen
-            , Tw.border_r
-            , Tw.border_color Tw.gray_200
-            ]
-        ]
-        [ viewSidebarLinks route
-        , viewSignOutButton user
-        ]
-
-
 viewSignOutButton : Auth.User -> Html Msg
 viewSignOutButton user =
     Html.button
@@ -147,6 +132,21 @@ viewSignOutButton user =
                 ]
             , Html.span [ class "" ] [ Html.text "Sign out" ]
             ]
+        ]
+
+
+viewSidebar : { user : Auth.User, route : Route () } -> Html Msg
+viewSidebar { user, route } =
+    Html.aside
+        [ css
+            [ Tw.overflow_y_scroll
+            , Tw.h_screen
+            , Tw.border_r
+            , Tw.border_color Tw.gray_200
+            ]
+        ]
+        [ viewSidebarLinks route
+        , viewSignOutButton user
         ]
 
 
