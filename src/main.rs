@@ -122,6 +122,7 @@ async fn blog_index() -> Json<BlogEntries> {
             slug: "yeet".into(),
             title: "yeet".into(),
             date: "2023-01-1".into(),
+            body: "hey a story".into(),
             category: "yeets".into(),
         },
         BlogEntry {
@@ -129,6 +130,7 @@ async fn blog_index() -> Json<BlogEntries> {
             title: "yeet 2".into(),
             date: "2023-02-1".into(),
             category: "yeets".into(),
+            body: "deep in the woods in a snuggly burrow".into(),
         },
     ];
     Json(BlogEntries { entries })
@@ -143,6 +145,7 @@ struct BlogEntries {
 struct BlogEntry {
     slug: String,
     date: String,
+    body: String,
     title: String,
     category: String,
 }

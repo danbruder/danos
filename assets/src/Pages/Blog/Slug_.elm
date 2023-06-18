@@ -9,6 +9,7 @@ import Html.Styled.Attributes as Attr exposing (css, href, style)
 import Html.Styled.Events as Events
 import Http
 import Layouts
+import List.Extra
 import Page exposing (Page)
 import Route exposing (Route)
 import Shared
@@ -21,7 +22,7 @@ import View exposing (View)
 page : Auth.User -> Shared.Model -> Route { slug : String } -> Page Model Msg
 page user shared route =
     Page.new
-        { init = init
+        { init = init route
         , update = update
         , subscriptions = subscriptions
         , view = view
@@ -44,12 +45,18 @@ layout user model =
 
 
 type alias Model =
-    { entries : Entries }
+    { entries : Entries
+    , selected : Maybe Entry
+    , slug : String
+    }
 
 
-init : () -> ( Model, Effect Msg )
-init _ =
-    ( { entries = [] }
+init : Route { slug : String } -> () -> ( Model, Effect Msg )
+init route _ =
+    ( { entries = []
+      , selected = Nothing
+      , slug = route.params.slug
+      }
     , Api.Blog.index
         { onResponse = GotBlogIndex
         }
@@ -68,7 +75,12 @@ update : Msg -> Model -> ( Model, Effect Msg )
 update msg model =
     case msg of
         GotBlogIndex (Ok entries) ->
-            ( { model | entries = entries }
+            let
+                selected =
+                    entries
+                        |> List.Extra.find (\entry -> entry.slug == model.slug)
+            in
+            ( { model | entries = entries, selected = selected }
             , Api.Blog.cache entries
             )
 
@@ -98,19 +110,44 @@ view model =
         [ Html.toUnstyled <|
             div
                 [ css
-                    [ Tw.bg_color Tw.gray_50
-                    , Tw.min_h_screen
-                    , Tw.overflow_y_scroll
-                    , Tw.w_96
-                    , Tw.p_3
-                    , Tw.space_y_1
+                    [ Tw.flex
                     ]
                 ]
-                (model.entries
-                    |> List.map viewEntry
-                )
+                [ div
+                    [ css
+                        [ Tw.bg_color Tw.gray_50
+                        , Tw.min_h_screen
+                        , Tw.overflow_y_scroll
+                        , Tw.w_96
+                        , Tw.p_3
+                        , Tw.space_y_1
+                        ]
+                    ]
+                    (model.entries
+                        |> List.map viewEntry
+                    )
+                , div
+                    [ css
+                        [ Tw.p_3
+                        ]
+                    ]
+                    [ viewEntryContent model.selected ]
+                ]
         ]
     }
+
+
+viewEntryContent : Maybe Entry -> Html Msg
+viewEntryContent maybeEntry =
+    case maybeEntry of
+        Just entry ->
+            div []
+                [ div [] [ text entry.title ]
+                , div [] [ text entry.body ]
+                ]
+
+        Nothing ->
+            div [] []
 
 
 viewEntry : Entry -> Html Msg

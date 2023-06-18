@@ -30,16 +30,18 @@ type alias Entry =
     , date : String
     , title : String
     , category : String
+    , body : String
     }
 
 
 entryDecoder : Json.Decode.Decoder Entry
 entryDecoder =
-    Json.Decode.map4 Entry
+    Json.Decode.map5 Entry
         (Json.Decode.field "slug" Json.Decode.string)
         (Json.Decode.field "date" Json.Decode.string)
         (Json.Decode.field "title" Json.Decode.string)
         (Json.Decode.field "category" Json.Decode.string)
+        (Json.Decode.field "body" Json.Decode.string)
 
 
 entriesDecoder : Json.Decode.Decoder Entries
@@ -54,6 +56,7 @@ encode entry =
         , ( "title", Json.Encode.string entry.title )
         , ( "date", Json.Encode.string entry.date )
         , ( "category", Json.Encode.string entry.category )
+        , ( "body", Json.Encode.string entry.body )
         ]
 
 
