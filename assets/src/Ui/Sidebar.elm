@@ -1,4 +1,4 @@
-module Ui.Sidebar exposing (view)
+module Ui.Sidebar exposing (Link, LinkGroup, view)
 
 import Css
 import Css.Global
@@ -14,9 +14,11 @@ import Tailwind.Utilities as Tw exposing (..)
 
 
 type alias Settings msg =
-    { sidebarItems : List (Html msg)
-    , content : List (Html msg)
+    { title : String
+    , linkGroups : List LinkGroup
     , widthClass : Css.Style
+    , content : List (Html msg)
+    , footer : List (Html msg)
     }
 
 
@@ -25,7 +27,7 @@ type alias Settings msg =
 
 
 view : Settings msg -> Html msg
-view settings =
+view { title, linkGroups, widthClass, content, footer } =
     Html.div [ css [ Tw.h_screen, Tw.min_h_screen ] ]
         [ Html.div [ css [ flex ] ]
             [ Html.div
@@ -33,10 +35,10 @@ view settings =
                     [ h_screen
                     , min_h_screen
                     , bg_color Tw.gray_50
-                    , settings.widthClass
+                    , widthClass
                     ]
                 ]
-                []
+                [ viewSidebar title linkGroups footer ]
             , Html.div
                 [ css
                     [ h_screen
@@ -45,33 +47,32 @@ view settings =
                     , w_full
                     ]
                 ]
-                [ viewSidebar settings.sidebarItems
-                , div [] settings.content
+                [ div [] content
                 ]
             ]
         ]
 
 
-viewSidebar : List (Html msg) -> Html msg
-viewSidebar content =
+viewSidebar : String -> List LinkGroup -> List (Html msg) -> Html msg
+viewSidebar title linkGroups footer =
     Html.aside
         [ css
             [ Tw.overflow_y_scroll
             , Tw.h_screen
             , Tw.border_r
             , Tw.border_color Tw.gray_200
+            , Tw.flex
+            , Tw.flex_col
             ]
         ]
-        content
-
-
-viewSidebarLinks : List LinkGroup -> Html msg
-viewSidebarLinks linkGroups =
-    div [ css [ Tw.flex_1, Tw.p_3, Tw.space_y_1 ] ]
-        [ h1 [ css [ Tw.font_bold, Tw.text_sm, Tw.px_2 ] ]
-            [ text "Dan Bruder"
+        [ div
+            [ css [ Tw.flex_1, Tw.p_3, Tw.space_y_1 ] ]
+            [ h1 [ css [ Tw.font_bold, Tw.text_sm, Tw.px_2 ] ]
+                [ text title
+                ]
+            , div [] <| List.map viewLinkGroup linkGroups
             ]
-        , div [] <| List.map viewLinkGroup linkGroups
+        , div [ css [ Tw.p_6, Tw.space_y_1, Tw.text_sm, Tw.font_semibold ] ] footer
         ]
 
 

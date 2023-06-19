@@ -15,6 +15,7 @@ import Shared
 import Tailwind.Breakpoints as Bp
 import Tailwind.Theme as Tw
 import Tailwind.Utilities as Tw exposing (..)
+import Ui.Sidebar exposing (Link, LinkGroup)
 import View exposing (View)
 
 
@@ -80,40 +81,43 @@ view settings route { fromMsg, model, content } =
     { title = content.title ++ " | DanOS"
     , body =
         [ Html.toUnstyled <|
-            Html.div [ css [ Tw.h_screen, Tw.min_h_screen ] ]
+            div []
                 [ Css.Global.global Tw.globalStyles
-                , Html.div [ css [ flex ] ]
-                    [ Html.div
-                        [ css
-                            [ h_screen
-                            , min_h_screen
-                            , bg_color Tw.gray_50
-                            , w_64
-                            ]
-                        ]
-                        [ viewSidebar
-                            { user = settings.user
-                            , route = route
-                            }
+                , Ui.Sidebar.view
+                    { widthClass = Tw.w_64
+                    , title = "Dan Bruder"
+                    , content = List.map Html.fromUnstyled content.body
+                    , linkGroups = linkGroups
+                    , footer =
+                        [ viewSignOutButton settings.user
                             |> Html.map fromMsg
                         ]
-                    , Html.div
-                        [ css
-                            [ h_screen
-                            , min_h_screen
-                            , overflow_y_scroll
-                            , w_full
-                            ]
-                        ]
-                        [ viewMainContent
-                            { title = settings.title
-                            , content = content
-                            }
-                        ]
-                    ]
+                    }
                 ]
         ]
     }
+
+
+linkGroups : List Ui.Sidebar.LinkGroup
+linkGroups =
+    [ LinkGroup ""
+        [ Link "Home" "/" ""
+        , Link "Writing" "/blog" ""
+        ]
+    , LinkGroup "Me"
+        [ Link "Bookmarks" "/bookmarks" ""
+        , Link "AMA" "/ama" ""
+        , Link "Stack" "/stack" ""
+        ]
+    , LinkGroup "Projects"
+        [ Link "TWHN" "/twhn" ""
+        , Link "Lifting" "/lifting" ""
+        ]
+    , LinkGroup "Online"
+        [ Link "Twitter" "https://twitter.com/danbruder" ""
+        , Link "Github" "https://github.com/danbruder" ""
+        ]
+    ]
 
 
 viewSignOutButton : Auth.User -> Html Msg
@@ -133,98 +137,3 @@ viewSignOutButton user =
             , Html.span [ class "" ] [ Html.text "Sign out" ]
             ]
         ]
-
-
-viewSidebar : { user : Auth.User, route : Route () } -> Html Msg
-viewSidebar { user, route } =
-    Html.aside
-        [ css
-            [ Tw.overflow_y_scroll
-            , Tw.h_screen
-            , Tw.border_r
-            , Tw.border_color Tw.gray_200
-            ]
-        ]
-        [ viewSidebarLinks route
-        , viewSignOutButton user
-        ]
-
-
-viewMainContent : { title : String, content : View msg } -> Html msg
-viewMainContent { title, content } =
-    div []
-        (content.body
-            |> List.map Html.fromUnstyled
-        )
-
-
-viewSidebarLinks : Route () -> Html msg
-viewSidebarLinks route =
-    div [ css [ Tw.flex_1, Tw.p_3, Tw.space_y_1 ] ]
-        [ h1 [ css [ Tw.font_bold, Tw.text_sm, Tw.px_2 ] ]
-            [ text "Dan Bruder"
-            ]
-        , viewLinkGroup ""
-            [ Link "Home" "/" ""
-            , Link "Writing" "/blog" ""
-            ]
-        , viewLinkGroup "Me"
-            [ Link "Bookmarks" "/bookmarks" ""
-            , Link "AMA" "/ama" ""
-            , Link "Stack" "/stack" ""
-            ]
-        , viewLinkGroup "Projects"
-            [ Link "TWHN" "/twhn" ""
-            , Link "Lifting" "/lifting" ""
-            ]
-        , viewLinkGroup "Online"
-            [ Link "Twitter" "https://twitter.com/danbruder" ""
-            , Link "Github" "https://github.com/danbruder" ""
-            ]
-        ]
-
-
-type alias Link =
-    { text : String, href : String, icon : String }
-
-
-viewLinkGroup : String -> List Link -> Html msg
-viewLinkGroup title links =
-    div []
-        [ div
-            [ css
-                [ Tw.text_color Tw.gray_400
-                , Tw.text_xs
-                , Tw.px_2
-                , Tw.pt_5
-                , Tw.pb_2
-                , Tw.font_semibold
-                ]
-            ]
-            [ text title ]
-        , links
-            |> List.map viewLink
-            |> div [ css [ Tw.space_y_1 ] ]
-        ]
-
-
-viewLink : Link -> Html msg
-viewLink l =
-    a
-        [ css
-            [ Tw.block
-            , Tw.text_sm
-            , Tw.px_2
-            , Tw.py_1_dot_5
-            , Tw.space_x_3
-            , Tw.font_medium
-            , Tw.text_color Tw.gray_700
-            , Css.hover
-                [ Tw.text_color Tw.gray_900
-                , Tw.bg_color Tw.gray_200
-                ]
-            , Tw.rounded_md
-            ]
-        , href l.href
-        ]
-        [ text l.text ]

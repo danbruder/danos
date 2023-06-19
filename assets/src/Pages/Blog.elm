@@ -16,6 +16,7 @@ import Shared
 import Tailwind.Breakpoints as Breakpoints
 import Tailwind.Theme as Tw
 import Tailwind.Utilities as Tw
+import Ui.Sidebar
 import View exposing (View)
 
 
@@ -97,46 +98,26 @@ view model =
     { title = "Pages.Writing"
     , body =
         [ Html.toUnstyled <|
-            div
-                [ css
-                    [ Tw.bg_color Tw.gray_50
-                    , Tw.min_h_screen
-                    , Tw.overflow_y_scroll
-                    , Tw.w_96
-                    , Tw.p_3
-                    , Tw.space_y_1
+            Ui.Sidebar.view
+                { widthClass = Tw.w_96
+                , title = "Writing"
+                , linkGroups =
+                    [ Ui.Sidebar.LinkGroup "" <| List.map entryToSidebarLink model.entries
                     ]
-                ]
-                (model.entries
-                    |> List.map viewEntry
-                )
+                , content =
+                    [ viewMainContent model
+                    ]
+                , footer = []
+                }
         ]
     }
 
 
-viewEntry : Entry -> Html Msg
-viewEntry entry =
-    Html.div []
-        [ Html.a
-            [ href ("/blog/" ++ entry.slug)
-            , css
-                [ Tw.flex
-                , Tw.space_x_3
-                , Tw.border_b
-                , Tw.border_color Tw.gray_100
-                , Tw.py_3_dot_5
-                , Tw.px_3
-                , Tw.text_sm
-                , Tw.rounded_lg
-                , Breakpoints.lg
-                    [ Tw.border_none
-                    , Tw.py_2
-                    ]
-                , Css.hover
-                    [ Tw.bg_color Tw.gray_200
-                    ]
-                ]
-            ]
-            [ Html.text entry.title
-            ]
-        ]
+entryToSidebarLink : Entry -> Ui.Sidebar.Link
+entryToSidebarLink entry =
+    { text = entry.title, href = "/blog/" ++ entry.slug, icon = "" }
+
+
+viewMainContent : Model -> Html Msg
+viewMainContent model =
+    div [] []

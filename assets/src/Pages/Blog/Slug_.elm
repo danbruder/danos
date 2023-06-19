@@ -16,6 +16,7 @@ import Shared
 import Tailwind.Breakpoints as Breakpoints
 import Tailwind.Theme as Tw exposing (..)
 import Tailwind.Utilities as Tw exposing (..)
+import Ui.Sidebar
 import View exposing (View)
 
 
@@ -108,63 +109,22 @@ view model =
     { title = "Pages.Writing"
     , body =
         [ Html.toUnstyled <|
-            Html.div [ css [ flex ] ]
-                [ Html.div
-                    [ css
-                        [ h_screen
-                        , min_h_screen
-                        , bg_color Tw.gray_50
-                        , w_full
-                        , max_w_xs
-                        ]
+            Ui.Sidebar.view
+                { widthClass = Tw.w_96
+                , title = "Writing"
+                , linkGroups =
+                    [ Ui.Sidebar.LinkGroup "" <| List.map entryToSidebarLink model.entries
                     ]
-                    [ viewSidebar model
-                    ]
-                , Html.div
-                    [ css
-                        [ h_screen
-                        , min_h_screen
-                        , overflow_y_scroll
-                        , w_full
-                        ]
-                    ]
+                , content =
                     [ viewMainContent model
                     ]
-                ]
+                , footer = []
+                }
         ]
     }
 
 
-viewSidebarTitle =
-    div [ css [ Tw.font_bold, Tw.text_sm, Tw.px_2 ] ] [ text "Writing" ]
-
-
-viewSidebar : Model -> Html Msg
-viewSidebar model =
-    Html.aside
-        [ css
-            [ Tw.overflow_y_scroll
-            , Tw.h_screen
-            , Tw.border_r
-            , Tw.border_color Tw.gray_200
-            ]
-        ]
-        [ viewSidebarLinks model
-        ]
-
-
-viewSidebarLinks : Model -> Html Msg
-viewSidebarLinks model =
-    div [ css [ Tw.flex_1, Tw.p_3, Tw.space_y_1 ] ]
-        [ h1 [ css [ Tw.font_bold, Tw.text_sm, Tw.px_2 ] ]
-            [ text "Writing"
-            ]
-        , viewLinkGroup ""
-            (model.entries |> List.map entryToSidebarLink)
-        ]
-
-
-entryToSidebarLink : Entry -> Link
+entryToSidebarLink : Entry -> Ui.Sidebar.Link
 entryToSidebarLink entry =
     { text = entry.title, href = "/blog/" ++ entry.slug, icon = "" }
 
@@ -180,49 +140,3 @@ viewMainContent model =
 
         Nothing ->
             div [] []
-
-
-type alias Link =
-    { text : String, href : String, icon : String }
-
-
-viewLinkGroup : String -> List Link -> Html msg
-viewLinkGroup title links =
-    div []
-        [ div
-            [ css
-                [ Tw.text_color Tw.gray_400
-                , Tw.text_xs
-                , Tw.px_2
-                , Tw.pt_5
-                , Tw.pb_2
-                , Tw.font_semibold
-                ]
-            ]
-            [ text title ]
-        , links
-            |> List.map viewLink
-            |> div [ css [ Tw.space_y_1 ] ]
-        ]
-
-
-viewLink : Link -> Html msg
-viewLink l =
-    a
-        [ css
-            [ Tw.block
-            , Tw.text_sm
-            , Tw.px_2
-            , Tw.py_1_dot_5
-            , Tw.space_x_3
-            , Tw.font_medium
-            , Tw.text_color Tw.gray_700
-            , Css.hover
-                [ Tw.text_color Tw.gray_900
-                , Tw.bg_color Tw.gray_200
-                ]
-            , Tw.rounded_md
-            ]
-        , href l.href
-        ]
-        [ text l.text ]
