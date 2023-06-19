@@ -102,11 +102,11 @@ linkGroups : List Ui.Sidebar.LinkGroup
 linkGroups =
     [ LinkGroup ""
         [ Link "Home" "/" ""
-        , Link "Writing" "/blog" ""
+        , Link "Writing" "/blog/none" ""
         ]
     , LinkGroup "Me"
-        [ Link "Bookmarks" "/bookmarks" ""
-        , Link "AMA" "/ama" ""
+        [ Link "Bookmarks" "/bookmarks/none" ""
+        , Link "AMA" "/ama/none" ""
         , Link "Stack" "/stack" ""
         ]
     , LinkGroup "Projects"
