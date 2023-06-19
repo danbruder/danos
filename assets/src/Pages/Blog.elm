@@ -20,18 +20,18 @@ import Ui.Sidebar
 import View exposing (View)
 
 
-page : Auth.User -> Shared.Model -> Route () -> Page Model Msg
-page user shared route =
+page : Shared.Model -> Route () -> Page Model Msg
+page shared route =
     Page.new
         { init = init
         , update = update
         , subscriptions = subscriptions
         , view = view
         }
-        |> Page.withLayout (layout user)
+        |> Page.withLayout (layout shared.user)
 
 
-layout : Auth.User -> Model -> Layouts.Layout
+layout : Maybe Auth.User -> Model -> Layouts.Layout
 layout user model =
     Layouts.Sidebar
         { sidebar =

@@ -26,7 +26,7 @@ layout user model =
     Layouts.Sidebar
         { sidebar =
             { title = "Settings"
-            , user = user
+            , user = Just user
             }
         }
 

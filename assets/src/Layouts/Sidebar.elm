@@ -21,7 +21,7 @@ import View exposing (View)
 
 type alias Settings =
     { title : String
-    , user : Auth.User
+    , user : Maybe Auth.User
     }
 
 
@@ -89,8 +89,12 @@ view settings route { fromMsg, model, content } =
                     , content = List.map Html.fromUnstyled content.body
                     , linkGroups = linkGroups
                     , footer =
-                        [ viewSignOutButton settings.user
-                            |> Html.map fromMsg
+                        [ settings.user
+                            |> Maybe.map
+                                (viewSignOutButton
+                                    >> Html.map fromMsg
+                                )
+                            |> Maybe.withDefault (span [] [])
                         ]
                     }
                 ]
