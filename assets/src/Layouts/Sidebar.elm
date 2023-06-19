@@ -125,11 +125,11 @@ viewSignOutButton user =
     Html.button
         [ Events.onClick UserClickedSignOut
         ]
-        [ Html.div [ class "" ]
-            [ Html.figure [ class "" ]
+        [ Html.div [ css [ Tw.flex, Tw.items_center, Tw.space_x_3 ] ]
+            [ Html.figure []
                 [ Html.img
-                    [ class ""
-                    , src ""
+                    [ css [ Tw.rounded_full, w_8, h_8 ]
+                    , src "https://danbruder.com/processed_images/88fcb81ab1a7e49d00.png "
                     , alt user.name
                     ]
                     []
