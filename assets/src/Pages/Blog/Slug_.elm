@@ -5,7 +5,7 @@ import Auth
 import Css
 import Effect exposing (Effect)
 import Html.Styled as Html exposing (..)
-import Html.Styled.Attributes as Attr exposing (css, href, style)
+import Html.Styled.Attributes as Attr exposing (class, css, href, style)
 import Html.Styled.Events as Events
 import Http
 import Layouts
@@ -35,7 +35,7 @@ layout : Auth.User -> Model -> Layouts.Layout
 layout user model =
     Layouts.Sidebar
         { sidebar =
-            { title = "TODO"
+            { title = "Writing"
             , user = user
             }
         }
@@ -106,7 +106,7 @@ subscriptions model =
 
 view : Model -> View Msg
 view model =
-    { title = "Pages.Writing"
+    { title = "Writing"
     , body =
         [ Html.toUnstyled <|
             Ui.Sidebar.view
@@ -131,12 +131,51 @@ entryToSidebarLink entry =
 
 viewMainContent : Model -> Html Msg
 viewMainContent model =
-    case model.selected of
-        Just entry ->
-            div []
-                [ div [] [ text entry.title ]
-                , div [] [ text entry.body ]
-                ]
+    model.selected |> Maybe.map viewEntryDetail |> Maybe.withDefault viewEmptyDetail
 
-        Nothing ->
-            div [] []
+
+viewEntryDetail : Entry -> Html Msg
+viewEntryDetail entry =
+    div
+        [ css
+            [ Tw.max_w_3xl
+            , Tw.m_auto
+            , Tw.py_12
+            , Tw.px_4
+            , Tw.pb_10
+            , Breakpoints.md
+                [ Tw.px_8
+                ]
+            ]
+        ]
+        [ div [ css [ Tw.space_y_3 ] ]
+            [ h1
+                [ css
+                    [ Tw.text_2xl
+                    , Tw.font_bold
+                    , Breakpoints.xl [ Tw.text_3xl ]
+                    ]
+                ]
+                [ text entry.title ]
+            , span
+                [ css
+                    [ Tw.inline_block
+                    , Tw.leading_snug
+                    , Tw.text_color Tw.gray_600
+                    ]
+                ]
+                [ text entry.date ]
+            ]
+        , div
+            [ css
+                [ Tw.mt_8
+                , Tw.prose
+                ]
+            ]
+            [ text entry.body ]
+        ]
+
+
+viewEmptyDetail : Html Msg
+viewEmptyDetail =
+    div [] []
