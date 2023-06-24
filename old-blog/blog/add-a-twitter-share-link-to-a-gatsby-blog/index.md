@@ -2,13 +2,14 @@
 date: 2018-08-13
 title: Add a twitter share link to a gatsby blog
 slug: add-a-twitter-share-link-to-a-gatsby-blog
-category: Frontend
-tags:
-  - gatsby
-  - twitter
+taxonomies:
+  category: [Frontend]
+  tags:
+    - gatsby
+    - twitter
 ---
 
-To add a twitter share link, you can use the link format outlined here: [https://developer.twitter.com/en/docs/twitter-for-websites/tweet-button/overview.html](https://developer.twitter.com/en/docs/twitter-for-websites/tweet-button/overview.html). 
+To add a twitter share link, you can use the link format outlined here: [https://developer.twitter.com/en/docs/twitter-for-websites/tweet-button/overview.html](https://developer.twitter.com/en/docs/twitter-for-websites/tweet-button/overview.html).
 
 For me, this meant formatting the link with the url, title, and my twitter handle:
 
@@ -36,7 +37,7 @@ export const pageQuery = graphql`
 }
 ```
 
-Make sure your `pageQuery` includes the needed data (title, slug): 
+Make sure your `pageQuery` includes the needed data (title, slug):
 
 ```js
 // Shortened for brevity

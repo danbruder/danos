@@ -2,17 +2,18 @@
 date: 2018-07-27
 title: Example using Dynamic Supervision in Elixir/OTP
 slug: example-using-dynamic-supervision-in-elixir-otp
-category: Backend
-tags:
-  - elixir
-  - otp
+taxonomies:
+  category: [Backend]
+  tags:
+    - elixir
+    - otp
 ---
 
-Here's an example of a dynamic supervision tree in Elixir/OTP. Say we have an application that tracks trains in a fleet. We have the following topology: 
+Here's an example of a dynamic supervision tree in Elixir/OTP. Say we have an application that tracks trains in a fleet. We have the following topology:
 
 ![trains](trains.png)
 
-Since on a given day different trains will be active, we want to be able to dynamically add and remove processes for them to the supervision tree. 
+Since on a given day different trains will be active, we want to be able to dynamically add and remove processes for them to the supervision tree.
 
 ```elixir
 defmodule Yard.Server do
@@ -108,7 +109,7 @@ defmodule Yard.Train do
 end
 ```
 
-Next, we add the Yard server and the Train Supervisor to the application supervision tree: 
+Next, we add the Yard server and the Train Supervisor to the application supervision tree:
 
 ```elixir
 defmodule Yard.Application do
@@ -128,7 +129,7 @@ defmodule Yard.Application do
 end
 ```
 
-Now when we fire up `iex -S mix` we can add trains and update their speeds: 
+Now when we fire up `iex -S mix` we can add trains and update their speeds:
 
 ```elixir
 iex> {:ok, pid} = Yard.Server.add_train("A13")
@@ -144,7 +145,4 @@ iex> Yard.Train.get(pid)
 {:ok, %{id: "A13", speed: 65}}
 ```
 
-If a train process crashes, it will be restarted by the `TrainSupervisor`. In another post, I'm going to look at how to maintain state across crashes. 
-
-
-
+If a train process crashes, it will be restarted by the `TrainSupervisor`. In another post, I'm going to look at how to maintain state across crashes.
