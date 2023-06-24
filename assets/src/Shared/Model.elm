@@ -6,6 +6,7 @@ import Json.Encode
 
 type alias Model =
     { user : Maybe User
+    , cache : Dict String Json.Encode.Value
     }
 
 

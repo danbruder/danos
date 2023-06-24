@@ -1,6 +1,7 @@
 port module Effect exposing
     ( Effect
     , batch
+    , cache
     , clearUser
     , loadExternalUrl
     , map
@@ -77,6 +78,11 @@ saveToLocalStorage key value =
         { key = key
         , value = value
         }
+
+
+cache : String -> Json.Encode.Value -> Effect msg
+cache key value =
+    SendSharedMsg (Shared.Msg.PutInCache key value)
 
 
 clearUser : Effect msg

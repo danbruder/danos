@@ -11,3 +11,5 @@ tokio = { version = "1.0", features = ["full"] }
 tower-http = { version = "0.4.0", features = ["cors"] }
 serde = {version = "*", features=["derive"]}
 anyhow = "1.0.71"
+glob = "0.3.1"
+yaml-front-matter = "0.1.0"

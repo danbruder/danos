@@ -3,13 +3,18 @@ module Pages.Blog.Slug_ exposing (Model, Msg, page)
 import Api.Blog exposing (Entries, Entry)
 import Auth
 import Css
+import Dict exposing (Dict)
 import Effect exposing (Effect)
 import Html.Styled as Html exposing (..)
 import Html.Styled.Attributes as Attr exposing (class, css, href, style)
 import Html.Styled.Events as Events
 import Http
+import Json.Encode
 import Layouts
 import List.Extra
+import Markdown.Html
+import Markdown.Parser
+import Markdown.Renderer
 import Page exposing (Page)
 import Route exposing (Route)
 import Shared
@@ -23,7 +28,7 @@ import View exposing (View)
 page : Shared.Model -> Route { slug : String } -> Page Model Msg
 page shared route =
     Page.new
-        { init = init route
+        { init = init route shared.cache
         , update = update
         , subscriptions = subscriptions
         , view = view
@@ -52,15 +57,30 @@ type alias Model =
     }
 
 
-init : Route { slug : String } -> () -> ( Model, Effect Msg )
-init route _ =
-    ( { entries = []
-      , selected = Nothing
+init : Route { slug : String } -> Dict String Json.Encode.Value -> () -> ( Model, Effect Msg )
+init route cache _ =
+    let
+        existing =
+            Api.Blog.fromCache cache
+
+        selected =
+            existing
+                |> List.Extra.find (\entry -> entry.slug == route.params.slug)
+
+        effect =
+            if List.length existing == 0 then
+                Api.Blog.index
+                    { onResponse = GotBlogIndex
+                    }
+
+            else
+                Effect.none
+    in
+    ( { entries = existing
+      , selected = selected
       , slug = route.params.slug
       }
-    , Api.Blog.index
-        { onResponse = GotBlogIndex
-        }
+    , effect
     )
 
 
@@ -82,7 +102,7 @@ update msg model =
                         |> List.Extra.find (\entry -> entry.slug == model.slug)
             in
             ( { model | entries = entries, selected = selected }
-            , Api.Blog.cache entries
+            , Api.Blog.cache entries |> Debug.log "sending cache"
             )
 
         GotBlogIndex (Err _) ->
@@ -172,8 +192,28 @@ viewEntryDetail entry =
                 , Tw.prose
                 ]
             ]
-            [ text entry.body ]
+            (viewMarkdownBody entry.body)
         ]
+
+
+viewMarkdownBody : String -> List (Html msg)
+viewMarkdownBody body =
+    case
+        body
+            |> Markdown.Parser.parse
+    of
+        Ok okAst ->
+            case Markdown.Renderer.render Markdown.Renderer.defaultHtmlRenderer okAst of
+                Ok rendered ->
+                    rendered |> List.map Html.fromUnstyled
+
+                Err _ ->
+                    [ text "~ could not parse markdown ~" ]
+
+        Err error ->
+            [ (error |> List.map Markdown.Parser.deadEndToString |> String.join "\n")
+                |> text
+            ]
 
 
 viewEmptyDetail : Html Msg

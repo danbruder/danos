@@ -58,7 +58,7 @@ init flagsResult route =
             flagsResult
                 |> Result.withDefault { user = Nothing }
     in
-    ( { user = flags.user }
+    ( { user = flags.user, cache = Dict.empty }
     , Effect.none
     )
 
@@ -89,6 +89,11 @@ update route msg model =
         Shared.Msg.SignOut ->
             ( { model | user = Nothing }
             , Effect.clearUser
+            )
+
+        Shared.Msg.PutInCache key value ->
+            ( { model | cache = Dict.insert key value model.cache }
+            , Effect.none
             )
 
 

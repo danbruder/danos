@@ -3,7 +3,7 @@ module Api.Blog exposing
     , Entry
     , cache
     , cacheKey
-    , encode
+    , encodeEntries
     , entryDecoder
     , fromCache
     , index
@@ -49,8 +49,17 @@ entriesDecoder =
     Json.Decode.field "entries" (Json.Decode.list entryDecoder)
 
 
-encode : Entry -> Json.Encode.Value
-encode entry =
+encodeEntries : List Entry -> Json.Encode.Value
+encodeEntries entries =
+    Json.Encode.object
+        [ ( "entries"
+          , Json.Encode.list encodeEntry entries
+          )
+        ]
+
+
+encodeEntry : Entry -> Json.Encode.Value
+encodeEntry entry =
     Json.Encode.object
         [ ( "slug", Json.Encode.string entry.slug )
         , ( "title", Json.Encode.string entry.title )
@@ -82,9 +91,16 @@ index options =
 
 cache : List Entry -> Effect msg
 cache entries =
-    Effect.saveToLocalStorage cacheKey (Json.Encode.list encode entries)
+    Effect.cache cacheKey (encodeEntries entries)
 
 
 fromCache : Dict String Json.Encode.Value -> List Entry
 fromCache c =
-    []
+    c
+        |> Dict.get cacheKey
+        |> Maybe.andThen
+            (\value ->
+                Json.Decode.decodeValue entriesDecoder value
+                    |> Result.toMaybe
+            )
+        |> Maybe.withDefault []

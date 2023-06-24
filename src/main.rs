@@ -5,9 +5,11 @@ use axum::{
     routing::{get, post},
     Json, Router,
 };
+use glob::glob;
 use serde::{Deserialize, Serialize};
 use tokio::{time, time::Duration};
 use tower_http::cors::CorsLayer;
+use yaml_front_matter::YamlFrontMatter;
 
 const SECRET_TOKEN_EXAMPLE: &'static str = "123";
 
@@ -117,22 +119,7 @@ struct User {
 // Blog stuff
 
 async fn blog_index() -> Json<BlogEntries> {
-    let entries = vec![
-        BlogEntry {
-            slug: "yeet".into(),
-            title: "yeet".into(),
-            date: "2023-01-1".into(),
-            body: "hey a story".into(),
-            category: "yeets".into(),
-        },
-        BlogEntry {
-            slug: "yeet2".into(),
-            title: "yeet 2".into(),
-            date: "2023-02-1".into(),
-            category: "yeets".into(),
-            body: "deep in the woods in a snuggly burrow".into(),
-        },
-    ];
+    let entries = get_entries();
     Json(BlogEntries { entries })
 }
 
@@ -148,4 +135,57 @@ struct BlogEntry {
     body: String,
     title: String,
     category: String,
+    tags: Vec<String>,
+}
+
+#[derive(Deserialize)]
+struct BlogMetadata {
+    date: Option<String>,
+    draft: Option<bool>,
+    title: String,
+    slug: String,
+    taxonomies: BlogTaxonomies,
+}
+
+#[derive(Deserialize)]
+struct BlogTaxonomies {
+    category: Vec<String>,
+    tags: Vec<String>,
+}
+
+fn get_entries() -> Vec<BlogEntry> {
+    let mut entries = vec![];
+    let paths = glob("old-blog/blog/**/*.md").expect("Failed to read glob pattern");
+
+    for path in paths {
+        let path = path.unwrap();
+        let contents = std::fs::read_to_string(path.clone()).unwrap();
+        if let Ok(yaml) = YamlFrontMatter::parse::<BlogMetadata>(&contents) {
+            let BlogMetadata {
+                slug,
+                draft,
+                date,
+                title,
+                taxonomies: BlogTaxonomies { category, tags },
+            } = yaml.metadata;
+
+            if !draft.unwrap_or_default() {
+                entries.push(BlogEntry {
+                    slug,
+                    date: date.unwrap_or_default(),
+                    body: yaml.content,
+                    title,
+                    category: category.join(", "),
+                    tags,
+                });
+            }
+        } else {
+            println!("FAILED: {}", path.display());
+        }
+    }
+
+    entries.sort_by_key(|e| e.date.clone());
+    entries.reverse();
+
+    entries
 }
