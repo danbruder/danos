@@ -87,7 +87,8 @@ view settings route { fromMsg, model, content } =
                     { widthClass = Tw.w_64
                     , title = "Dan Bruder"
                     , content = List.map Html.fromUnstyled content.body
-                    , linkGroups = linkGroups
+                    , items = linkGroups
+                    , viewItem = Ui.Sidebar.viewLinkGroup
                     , footer =
                         [ settings.user
                             |> Maybe.map

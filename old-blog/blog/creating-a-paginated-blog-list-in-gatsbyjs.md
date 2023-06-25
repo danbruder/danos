@@ -2,29 +2,29 @@
 date: 2018-07-20
 title: Creating a paginated blog list in GatsbyJS
 slug: creating-a-paginated-blog-list-in-gatsbyjs
-taxonomies: 
-    category: [Frontend]
-    tags:
-      - gatsby
-      - jam
+taxonomies:
+  category: [Frontend]
+  tags:
+    - gatsby
+    - jam
 ---
 
-Here's how I added the pagination to the blog listing on this site. 
+Here's how I added the pagination to the blog listing on this site.
 
-To create pages in Gatsby, you implement the `createPage` API in `gatsby-node.js`. 
+To create pages in Gatsby, you implement the `createPage` API in `gatsby-node.js`.
 
-Let's start with the full example and then break it down: 
+Let's start with the full example and then break it down:
 
 ```js
-var path = require('path')
-var _ = require('lodash')
+var path = require("path");
+var _ = require("lodash");
 
-const PAGE_SIZE = 10
+const PAGE_SIZE = 10;
 
 exports.createPages = ({ graphql, actions }) => {
-  const { createPage } = actions
-  const blogListTemplate = path.resolve(`src/templates/blogList.js`)
-  
+  const { createPage } = actions;
+  const blogListTemplate = path.resolve(`src/templates/blogList.js`);
+
   return new Promise((resolve, reject) => {
     resolve(
       graphql(
@@ -39,14 +39,14 @@ exports.createPages = ({ graphql, actions }) => {
             }
           }
         `
-      ).then(result => {
+      ).then((result) => {
         if (result.errors) {
-          reject(result.errors)
+          reject(result.errors);
         }
 
         // Break the entries into chunks according to
-        let chunks = _.chunk(result.data.posts.edges, PAGE_SIZE)
-        
+        let chunks = _.chunk(result.data.posts.edges, PAGE_SIZE);
+
         // For each of the chunks, call createPage()
         chunks.forEach((chunk, index) => {
           createPage({
@@ -59,12 +59,12 @@ exports.createPages = ({ graphql, actions }) => {
               hasNextPage: index != chunks.length - 1,
               nextPageLink: `/blog/page/${index + 2}`,
             },
-          })
-        })
+          });
+        });
       })
-    )
-  })
-}
+    );
+  });
+};
 ```
 
 The interesting part is using the `chunk` function from [lodash](https://lodash.com/docs/4.17.10#chunk) to break our array of posts into chunks (in our case pages):
@@ -111,39 +111,38 @@ chunks.forEach((chunk, index) => {
 })
 ```
 
-For create page, we pass the path we want the page to be accessible at, the component that will be rendered, and the graphql context that we want available to the rendered component. 
+For create page, we pass the path we want the page to be accessible at, the component that will be rendered, and the graphql context that we want available to the rendered component.
 
-In this case, I have added page metadata to the context so that I can use it in my `blogList` template to determine whether to show the next page or not. 
+In this case, I have added page metadata to the context so that I can use it in my `blogList` template to determine whether to show the next page or not.
 
 Here's the `BlogListPage` component:
 
 ```js
-import React from 'react'
-import { graphql, Link } from 'gatsby'
-import { get } from 'lodash'
+import React from "react";
+import { graphql, Link } from "gatsby";
+import { get } from "lodash";
 
-import Layout from '../components/layout'
-import BlogTeaser from '../components/BlogTeaser'
+import Layout from "../components/layout";
+import BlogTeaser from "../components/BlogTeaser";
 
 const BlogListPage = ({ data, pageContext }) => (
   <Layout>
     <div className="bg-gray-light ">
       <div className="mw7 center w-100 pa3 pv4-ns pa5-l ">
-        {get(data, 'posts.edges', []).map((edge, key) => (
+        {get(data, "posts.edges", []).map((edge, key) => (
           <BlogTeaser data={edge} key={key} />
         ))}
-        {pageContext &&
-          pageContext.hasNextPage && (
-            <Link class="flex items-center" to={pageContext.nextPageLink}>
-              <small>Next page</small>
-            </Link>
-          )}
+        {pageContext && pageContext.hasNextPage && (
+          <Link class="flex items-center" to={pageContext.nextPageLink}>
+            <small>Next page</small>
+          </Link>
+        )}
       </div>
     </div>
   </Layout>
-)
+);
 
-export default BlogListPage
+export default BlogListPage;
 
 export const pageQuery = graphql`
   fragment PostTeaserFragment on ContentfulPost {
@@ -172,7 +171,7 @@ export const pageQuery = graphql`
       }
     }
   }
-`
+`;
 ```
 
 In the `pageQuery`, I use `skip` and `limit` from the `context` we passed to `createPage` in `gatsby-node.js` to get the posts for this page:
@@ -208,9 +207,9 @@ export const pageQuery = graphql`
 `
 ```
 
-Then I can use that data in my `BlogListPage` component to conditionally render the next page link: 
+Then I can use that data in my `BlogListPage` component to conditionally render the next page link:
 
-```js,hl_lines=1 8-13 
+```js,hl_lines=1 8-13
 const BlogListPage = ({ data, pageContext }) => (
   <Layout>
     <div className="bg-gray-light ">
@@ -230,7 +229,6 @@ const BlogListPage = ({ data, pageContext }) => (
 )
 ```
 
+Check it out here: [https://github.com/danbruder/blog/blob/gatsby/gatsby-node.js](https://github.com/danbruder/blog/blob/gatsby/gatsby-node.js)
 
-Check it out here: [https://github.com/danbruder/blog/blob/master/gatsby-node.js](https://github.com/danbruder/blog/blob/master/gatsby-node.js)
-
-And here it is in action: [https://danbruder.com/blog/page/1](https://danbruder.com/blog/page/1).
+And here it is in action: [https://danbruder.com/blog/page/1](https://danbruder.com/blog/page/1). (Update 6/25/23: This blog doesn't use gatsby any more so this page doesn't exist!)

@@ -6,7 +6,7 @@ import Css
 import Dict exposing (Dict)
 import Effect exposing (Effect)
 import Html.Styled as Html exposing (..)
-import Html.Styled.Attributes as Attr exposing (class, css, href, style)
+import Html.Styled.Attributes as Attr exposing (class, classList, css, href, style)
 import Html.Styled.Events as Events
 import Http
 import Json.Encode
@@ -132,9 +132,8 @@ view model =
             Ui.Sidebar.view
                 { widthClass = Tw.w_96
                 , title = "Writing"
-                , linkGroups =
-                    [ Ui.Sidebar.LinkGroup "" <| List.map entryToSidebarLink model.entries
-                    ]
+                , viewItem = viewLinks model.selected
+                , items = [ List.map entryToLink model.entries ]
                 , content =
                     [ viewMainContent model
                     ]
@@ -144,9 +143,9 @@ view model =
     }
 
 
-entryToSidebarLink : Entry -> Ui.Sidebar.Link
-entryToSidebarLink entry =
-    { text = entry.title, href = "/blog/" ++ entry.slug, icon = "" }
+entryToLink : Entry -> Link
+entryToLink entry =
+    { text = entry.title, href = "/blog/" ++ entry.slug, date = entry.date }
 
 
 viewMainContent : Model -> Html Msg
@@ -219,3 +218,83 @@ viewMarkdownBody body =
 viewEmptyDetail : Html Msg
 viewEmptyDetail =
     div [] []
+
+
+type alias Link =
+    { text : String, href : String, date : String }
+
+
+viewLinks : Maybe Entry -> List Link -> Html msg
+viewLinks selected links =
+    let
+        selectedHref =
+            selected |> Maybe.map (entryToLink >> .href)
+
+        isSelected link =
+            Just link.href == selectedHref
+    in
+    div []
+        [ div
+            [ css
+                [ Tw.text_color Tw.gray_400
+                , Tw.text_xs
+                , Tw.px_2
+                , Tw.pt_5
+                , Tw.pb_2
+                , Tw.font_semibold
+                ]
+            ]
+            []
+        , links
+            |> List.map
+                (\link ->
+                    viewLink (isSelected link) link
+                )
+            |> div [ css [ Tw.space_y_1 ] ]
+        ]
+
+
+viewLink : Bool -> Link -> Html msg
+viewLink isSelected l =
+    let
+        baseClasses =
+            [ Tw.block
+            , Tw.text_sm
+            , Tw.px_2
+            , Tw.py_1_dot_5
+            , Tw.font_medium
+            , Tw.text_color Tw.gray_700
+            , Css.hover
+                [ Tw.text_color Tw.gray_700
+                , Tw.bg_color Tw.gray_200
+                ]
+            , Tw.rounded_md
+            ]
+
+        selectedClasses =
+            [ Tw.bg_color Tw.gray_800
+            , Tw.text_color Tw.gray_50
+            , Css.hover
+                [ Tw.bg_color Tw.gray_900
+                , Tw.text_color Tw.gray_200
+                ]
+            ]
+
+        styles =
+            if isSelected then
+                baseClasses ++ selectedClasses
+
+            else
+                baseClasses
+    in
+    a
+        [ css styles
+        , href l.href
+        ]
+        [ div []
+            [ text l.text
+            ]
+        , div [ css [ text_xs, Tw.text_color Tw.gray_500 ] ]
+            [ text l.date
+            ]
+        ]

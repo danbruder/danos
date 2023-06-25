@@ -1,4 +1,4 @@
-module Ui.Sidebar exposing (Link, LinkGroup, view)
+module Ui.Sidebar exposing (Link, LinkGroup, view, viewLinkGroup)
 
 import Css
 import Css.Global
@@ -13,9 +13,10 @@ import Tailwind.Theme as Tw
 import Tailwind.Utilities as Tw exposing (..)
 
 
-type alias Settings msg =
+type alias Settings a msg =
     { title : String
-    , linkGroups : List LinkGroup
+    , items : List a
+    , viewItem : a -> Html msg
     , widthClass : Css.Style
     , content : List (Html msg)
     , footer : List (Html msg)
@@ -26,8 +27,8 @@ type alias Settings msg =
 -- VIEW
 
 
-view : Settings msg -> Html msg
-view { title, linkGroups, widthClass, content, footer } =
+view : Settings a msg -> Html msg
+view { title, items, viewItem, widthClass, content, footer } =
     Html.div [ css [ Tw.h_screen, Tw.min_h_screen ] ]
         [ Html.div [ css [ flex ] ]
             [ Html.div
@@ -38,7 +39,7 @@ view { title, linkGroups, widthClass, content, footer } =
                     , widthClass
                     ]
                 ]
-                [ viewSidebar title linkGroups footer ]
+                [ viewSidebar title viewItem items footer ]
             , Html.div
                 [ css
                     [ h_screen
@@ -53,8 +54,8 @@ view { title, linkGroups, widthClass, content, footer } =
         ]
 
 
-viewSidebar : String -> List LinkGroup -> List (Html msg) -> Html msg
-viewSidebar title linkGroups footer =
+viewSidebar : String -> (a -> Html msg) -> List a -> List (Html msg) -> Html msg
+viewSidebar title viewItem items footer =
     Html.aside
         [ css
             [ Tw.overflow_y_scroll
@@ -70,7 +71,7 @@ viewSidebar title linkGroups footer =
             [ h1 [ css [ Tw.font_bold, Tw.text_sm, Tw.px_2 ] ]
                 [ text title
                 ]
-            , div [] <| List.map viewLinkGroup linkGroups
+            , div [] <| List.map viewItem items
             ]
         , div [ css [ Tw.p_6, Tw.space_y_1, Tw.text_sm, Tw.font_semibold ] ] footer
         ]

@@ -101,9 +101,10 @@ view model =
             Ui.Sidebar.view
                 { widthClass = Tw.w_96
                 , title = "Writing"
-                , linkGroups =
+                , items =
                     [ Ui.Sidebar.LinkGroup "" <| List.map entryToSidebarLink model.entries
                     ]
+                , viewItem = \i -> div [] []
                 , content =
                     [ viewMainContent model
                     ]
